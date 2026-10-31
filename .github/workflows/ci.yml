@@ -10,9 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: leanprover/lean-action@v1
+      - name: Install Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Generate dependency manifest
+        run: lake update
+
+      - name: Save dependency manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: lake-manifest
+          path: lake-manifest.json
+
+      - name: Download Mathlib cache
+        run: lake exe cache get
 
       - name: Verify JSP-000301
         run: lake env lean JSP000301.lean
