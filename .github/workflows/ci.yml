@@ -18,17 +18,14 @@ jobs:
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      - name: Generate dependency manifest
-        run: lake update
-
-      - name: Save dependency manifest
-        uses: actions/upload-artifact@v4
-        with:
-          name: lake-manifest
-          path: lake-manifest.json
+      - name: Check dependency manifest
+        run: test -f lake-manifest.json
 
       - name: Download Mathlib cache
         run: lake exe cache get
 
-      - name: Verify JSP-000301
+      - name: Build Lean project
+        run: lake build
+
+      - name: Verify JSP-000301 and audit axioms
         run: lake env lean JSP000301.lean
